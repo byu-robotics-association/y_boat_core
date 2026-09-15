@@ -3,17 +3,21 @@ This is the official BYU Robotics Association Boat Software, including all firmw
 ## Getting Started with Development
 ### Prereqs
 - Install docker on your system (follow instructions online for Windows, MacOS, or Linux)
+
+### Clone Repo
 ```bash
 git clone https://github.com/BYU-Y-Robotics/y_boat_core.git
 cd y_boat_core
 ``` 
 
+### Copy Secrets File
 Copy the .env-example file into .env
 ```bash
 cp .env-example .env
 ```
 Update this .env file with the appropriate configuration for your environment
 
+### Build and Run the Container
 To test that everything is set up correctly, build and run the container with:
 ```bash
 docker compose build dev
