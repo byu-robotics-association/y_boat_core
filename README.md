@@ -17,14 +17,32 @@ cp .env-example .env
 ```
 Update this .env file with the appropriate configuration for your environment
 
+### Make the Scripts executables
+```bash
+chmod +x ./scripts/run.sh
+```
+
 ### Build and Run the Container
 To test that everything is set up correctly, build and run the container with:
 ```bash
-docker compose build dev
-docker compose run --rm dev 
+./scripts/run.sh
 ```
 This opens the container with a terminal for you to interact with the docker container.
 
 Run this to test every change you make.
 
 All packages should be created inside src/nodes/
+
+
+### Sync with Changes
+The following command will sync your local environment with origin/main
+```bash
+git fetch
+git pull origin
+```
+
+If you want to sync with a different branch run
+```bash
+git fetch
+git pull origin/your/branch/name
+```
