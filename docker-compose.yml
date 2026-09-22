@@ -1,13 +1,6 @@
 services:
   dev:
-    build:
-      context: ${BUILD_DIR:-.}
-      dockerfile: .docker/dockerfile.dev
-      args: 
-        - BASE_IMAGE=${BASE_IMAGE:-ros:jazzy-ros-base}
-        - ROS_DISTRO=${ROS_DISTRO:-jazzy}
-        - WORKSPACE=${WORKSPACE_DIR:-/workspace}
-    image: byu_boat_core:${ROS_DISTRO:-jazzy}
+    image: yrobotics/y_boat_core:${DOCKER_IMAGE}
     container_name: boat_dev
     network_mode: host
     privileged: true
