@@ -1,6 +1,6 @@
 ARG BASE_IMAGE=ros:jazzy-ros-base
 
-FROM ${BASE_IMAGE}
+FROM ros:jazzy-ros-base
 
 ARG ROS_DISTRO=jazzy
 ARG WORKSPACE=/workspace
