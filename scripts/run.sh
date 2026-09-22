@@ -6,11 +6,6 @@ HARDWARE="${1:-linux}"
 BRANCH="${2:-main}"
 IMAGE="${2:-latest}"
 
-git fetch 
-git pull origin
-
-# git checkout ...
-
 if [ "${HARDWARE}" = "nano" ]; then
     echo "Running for Jetson Nano"
     export DOCKER_IMAGE="${IMAGE:-latest}-nano"
