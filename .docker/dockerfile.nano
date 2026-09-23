@@ -25,6 +25,7 @@ WORKDIR ${WORKSPACE}
 
 COPY .docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+RUN echo 'source /opt/ros/humble/install/setup.bash' >> /root/.bashrc
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

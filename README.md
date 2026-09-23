@@ -27,7 +27,13 @@ To test that everything is set up correctly, build and run the container with:
 ```bash
 ./scripts/run.sh
 ```
-This opens the container with a terminal for you to interact with the docker container.
+This opens the container and runs the ROS2 startup
+
+For testing, run this as
+```bash
+./scripts/run.sh -i -p
+```
+The -i parameter makes it interactive, -p checks to make sure the docker image is updated and pulled correctly
 
 Run this to test every change you make.
 
