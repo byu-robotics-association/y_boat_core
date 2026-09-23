@@ -13,9 +13,9 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='root',
-    maintainer_email='root@todo.todo',
-    description='TODO: Package description',
+    maintainer='Josh McConkie',
+    maintainer_email='joshuamcconkie@gmail.com',
+    description='Package for handling perception on the BYU RoboBoat.',
     license='Apache-2.0',
     extras_require={
         'test': [
