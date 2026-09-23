@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'lidar_processor = boat_perception.lidar_processor:main',
         ],
     },
 )
