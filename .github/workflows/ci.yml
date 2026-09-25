@@ -1,0 +1,142 @@
+name: CI
+
+# PRs only: main is branch-protected, so nothing lands there without going
+# through a PR (and this check) first.
+on:
+  pull_request:
+
+# A new push to a PR makes any still-running check for its old commit moot.
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # Checks every function has argument/return type annotations (see
+  # ruff.toml -- only the ANN rules are enabled; code style is ament_flake8's
+  # job in `colcon test`). Needs no ROS, so it runs on a plain runner in
+  # seconds, and checks all of src/ rather than just changed packages since
+  # that costs nothing extra.
+  type-annotations:
+    name: Type annotations (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Pinned so a new Ruff release can't start failing PRs on its own;
+      # bump deliberately (and keep README.md's install command in sync).
+      - name: Install Ruff
+        run: pip install ruff==0.16.5
+
+      - name: Check type annotations
+        run: ruff check --output-format=github src .github
+
+  changes:
+    name: Detect changed packages
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.detect.outputs.mode }}
+      packages: ${{ steps.detect.outputs.packages }}
+    steps:
+      # Full history so the PR's base commit is available to diff against.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # See .github/scripts/changed_packages.py for how files map to
+      # packages and which paths count as "shared" (test everything).
+      - name: Detect changed packages
+        id: detect
+        run: |
+          python3 .github/scripts/changed_packages.py \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}"
+
+  build-and-test:
+    name: Docker build + colcon build/test
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # GitHub's ubuntu-latest runner ships with a lot of preinstalled
+      # toolchains (Android SDK/NDK, .NET, Haskell, ...) that this repo never
+      # touches. Reclaiming that space up front leaves margin for the ROS
+      # image plus buildx's own layer/blob cache, avoiding "no space left on
+      # device" errors as the image grows.
+      - name: Free up runner disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          docker system prune -af
+          df -h /
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Builds the same image as .docker/dockerfile.dev locally, with GitHub's
+      # Actions cache standing in for the layer cache you'd otherwise get for
+      # free on a local machine (a fresh runner has none). `load: true` makes
+      # the built image available to `docker run` in the next step.
+      - name: Build dev image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/dockerfile.dev
+          push: false
+          load: true
+          tags: y_boat_core:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Always builds the whole workspace -- catches package.xml/setup.py
+      # mistakes in any package, and packages being tested need their
+      # dependencies built anyway. Only the test run below is narrowed.
+      #
+      # `colcon test --packages-above` tests the changed packages *and*
+      # everything that depends on them, since a change to one package can
+      # break the packages built on top of it.
+      #
+      # rosdep installs each package's declared <depend>/<test_depend>s
+      # (e.g. ament_flake8, python3-pytest), which aren't baked into the
+      # image. apt-get update is needed first because the image clears its
+      # apt lists to save space.
+      #
+      # All in one `docker run` because build/ and install/ live in the
+      # container's /workspace, outside the bind-mounted src/, and would be
+      # gone by a second run.
+      - name: colcon build + test
+        env:
+          MODE: ${{ needs.changes.outputs.mode }}
+          PACKAGES: ${{ needs.changes.outputs.packages }}
+        run: |
+          TEST_SELECT=""
+          if [ "$MODE" = some ]; then
+            TEST_SELECT="--packages-above $PACKAGES"
+          fi
+          echo "mode=$MODE packages=${PACKAGES:-<none>}"
+
+          docker run --rm \
+            -e ROS_DISTRO=jazzy \
+            -e MODE="$MODE" \
+            -e TEST_SELECT="$TEST_SELECT" \
+            -v "${{ github.workspace }}/src:/workspace/src" \
+            y_boat_core:ci \
+            bash -lc '
+              set -e
+              apt-get update
+              rosdep update --rosdistro "$ROS_DISTRO"
+              rosdep install --from-paths src --ignore-src -y --rosdistro "$ROS_DISTRO"
+
+              colcon build --event-handlers console_direct+
+
+              if [ "$MODE" = none ]; then
+                echo "No ROS packages changed -- skipping tests."
+                exit 0
+              fi
+              # colcon test exits 0 even when tests fail; test-result is
+              # what prints the failure summary and fails the job.
+              colcon test --event-handlers console_direct+ $TEST_SELECT
+              colcon test-result --verbose
+            '

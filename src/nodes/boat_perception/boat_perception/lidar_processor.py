@@ -7,13 +7,13 @@ from rclpy.node import Node
 class LidarProcessor(Node):
     """Represent the boat LiDAR processor node."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the ROS node and log that it has started."""
         super().__init__("lidar_processor")
         self.get_logger().info("Lidar processor started")
 
 
-def main(args=None):
+def main(args: list[str] | None = None) -> None:
     """Start the node and release ROS resources when it stops."""
     rclpy.init(args=args)
     node = LidarProcessor()
