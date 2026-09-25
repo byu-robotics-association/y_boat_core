@@ -48,6 +48,13 @@ pip install ruff==0.16.5
 ruff check src .github
 ```
 
+### Run Tests Before Opening a PR
+Every PR runs CI checks: the type annotation check above, a build of the Docker image and workspace, and the tests for each package the PR changes. Run the same checks locally with:
+```bash
+./scripts/test.sh boat_perception
+```
+Name the package(s) you changed; packages that depend on them are tested too. Run `./scripts/test.sh` with no arguments to test everything. The first run builds the Docker image and takes a few minutes; later runs are quick. See `./scripts/test.sh -h` for options.
+
 ### Sync with Changes
 The following command will sync your local environment with origin/main
 ```bash
