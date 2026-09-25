@@ -39,6 +39,7 @@ Run this to test every change you make.
 
 All packages should be created inside src/nodes/
 
+Check out the tutorials in [ROS2 Demo] (https://github.com/byu-robotics-association/y_robotics_ros2_demo)
 
 ### Sync with Changes
 The following command will sync your local environment with origin/main
@@ -52,3 +53,5 @@ If you want to sync with a different branch run
 git fetch
 git pull origin/your/branch/name
 ```
+
+
