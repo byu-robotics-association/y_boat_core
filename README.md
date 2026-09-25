@@ -41,6 +41,13 @@ All packages should be created inside src/nodes/
 
 Check out the tutorials in [ROS2 Demo] (https://github.com/byu-robotics-association/y_robotics_ros2_demo)
 
+### Type Annotations
+Every function must declare types for its arguments and return value (e.g. `def main(args: list[str] | None = None) -> None:`). CI checks this with Ruff on every PR; run the same check locally from the repo root with:
+```bash
+pip install ruff==0.16.5
+ruff check src .github
+```
+
 ### Sync with Changes
 The following command will sync your local environment with origin/main
 ```bash

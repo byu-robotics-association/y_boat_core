@@ -2,11 +2,11 @@ import rclpy
 from rclpy.node import Node
 
 class LidarProcessor(Node):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("lidar_processor")
         self.get_logger().info("Lidar processor started")
 
-def main(args=None):
+def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)
     node = LidarProcessor()
     try:

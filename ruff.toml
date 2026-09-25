@@ -1,0 +1,13 @@
+# Ruff is used here *only* to check that functions have type annotations.
+# Code style is enforced by each package's ament_flake8 test (run via
+# `colcon test`), whose ROS 2 conventions -- single quotes, Google import
+# order, 99-char lines -- conflict with Ruff's defaults, so no other rule
+# groups are enabled.
+
+[lint]
+select = ["ANN"]
+
+[lint.per-file-ignores]
+# The linter tests `ros2 pkg create` generates in every package's test/ have
+# no annotations; exempting them keeps new packages passing out of the box.
+"**/test/**" = ["ANN"]
