@@ -1,10 +1,12 @@
 import rclpy
 from rclpy.node import Node
 
+
 class LidarProcessor(Node):
     def __init__(self) -> None:
-        super().__init__("lidar_processor")
-        self.get_logger().info("Lidar processor started")
+        super().__init__('lidar_processor')
+        self.get_logger().info('Lidar processor started')
+
 
 def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)
@@ -17,5 +19,6 @@ def main(args: list[str] | None = None) -> None:
         node.destroy_node()
         rclpy.shutdown()
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main()
