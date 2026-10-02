@@ -1,4 +1,4 @@
-services:
+﻿services:
   dev:
     image: yrobotics/y_boat_core:${DOCKER_IMAGE}
     container_name: boat_dev

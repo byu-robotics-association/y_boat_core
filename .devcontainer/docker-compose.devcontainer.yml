@@ -1,0 +1,9 @@
+services:
+  dev:
+    image: yrobotics/y_boat_core:latest
+    command: sleep infinity
+    volumes: !override
+      - .:/workspace
+      - /dev:/dev
+    environment:
+      - COLCON_HOME=/workspace/.colcon

@@ -11,7 +11,7 @@ This is the official BYU Robotics Association Boat Software, including all firmw
 >wsl --install
 >```
 
-- *(Recommended)* Install VSCode on your system. This is the preferred and supported development IDE for this project. Use other IDEs with caution. [Download Link](https://code.visualstudio.com/download?_exp_download=fb315fc982)
+- *(Recommended)* Install VS Code on your system. This is the preferred and supported development IDE for this project. Use other IDEs with caution. [Download Link](https://code.visualstudio.com/download?_exp_download=fb315fc982)
 
 ### Docker setup
 On Mac and Windows, open the docker desktop app. You will need to open this app anytime you want to run the scripts
@@ -37,7 +37,29 @@ Copy the .env-example file into .env
 ```bash
 cp .env-example .env
 ```
-The default .env settings work right away for general development, change these variables when neccesary
+The default .env settings work right away for general development, change these variables when necessary.
+
+### Development Container
+For interactive development in VS Code, install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+
+Make sure Docker is running before starting the development container.
+
+Open the repository in VS Code. Click the remote window button in the lower-left corner of the VS Code window, then select **Reopen in Container**.
+
+After the container is ready, open a terminal in VS Code and verify that ROS 2 is available:
+
+```bash
+ros2
+```
+
+The container performs an initial build automatically. Run this command manually after making package changes from within the container.
+
+```bash
+colcon build --packages-select <package_name> --symlink-install
+source install/setup.bash
+```
+
+For VS Code-based development, use the Dev Container workflow above. The `scripts/run.sh` workflow below is also available for terminal-based development, runtime testing, or running the project on the boat.
 
 ### Make the Scripts Executable
 ```bash
@@ -59,9 +81,29 @@ ros2
 ```
 
 ### Development
-All packages should be created inside src/nodes/
+All packages should be created inside `src/nodes/`
 
 Check out the tutorials in [ROS2 Demo](https://github.com/byu-robotics-association/y_robotics_ros2_demo)
+
+For documentation on a specific package, take a look at its package README.
+| Package | Description | Documentation |
+|---|---|---|
+| `boat_perception` | Environment perception system | [`README.md`](src/nodes/boat_perception/README.md) |
+
+### Build a Package
+
+```bash
+colcon build --packages-select <package_name> --symlink-install
+source install/setup.bash
+```
+
+### Run a Package
+
+```bash
+ros2 launch <package_name> <launch_file>.launch.py
+```
+
+For package-specific instructions, see that package's README.
 
 #### Sync with Git Changes
 The following command will sync your local environment with origin/main
