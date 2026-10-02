@@ -1,0 +1,134 @@
+name: CI
+
+# We only need this to run on PRs since no one will be committing to main
+on:
+  pull_request:
+
+# Interrupt old actions on new commits for PRs (only works with PRs, not on commit pushes)
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # Type annotations don't run on a ROS node - they run in their own quick
+  # test.  Installs ruff and runs `ruff check`.
+  type-annotations:
+    name: Type annotations (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Hardcode version to avoid behavior changes (make sure to keep
+      # README.md's install command in sync).
+      - name: Install Ruff
+        run: pip install ruff==0.16.5
+
+      # Run the check
+      - name: Check type annotations
+        run: ruff check --output-format=github src .github
+
+  changes:
+    name: Detect changed packages
+    runs-on: ubuntu-latest
+    # Accessible under changes.outputs.mode and changes.outputs.packages
+    outputs:
+      mode: ${{ steps.detect.outputs.mode }}
+      packages: ${{ steps.detect.outputs.packages }}
+    steps:
+      # Full history so the PR's base commit is available to diff against.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # See .github/scripts/changed_packages.py.
+      - name: Detect changed packages
+        id: detect
+        run: |
+          python3 .github/scripts/changed_packages.py \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}"
+
+  build-and-test:
+    name: Docker build + colcon build/test
+    # Waits for changes job to finish, then makes its variables accessible
+    # needs.changes.outputs.mode
+    # needs.changes.outputs.packages
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # GitHub's ubuntu-latest runner ships with a lot of preinstalled
+      # stuff that this repo never touches. Reclaiming space for the ROS
+      # image plus buildx's own layer/blob cache, avoiding running out of
+      # space in Github Actions.
+      - name: Free up runner disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          docker system prune -af
+          df -h /
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Github Actions has the ability to store a cache.  This handles
+      # reading and writing to that cache.  It builds the docker image
+      # so that we can reuse it in different steps in the PR.
+      - name: Build dev image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/dockerfile.dev
+          push: false
+          load: true
+          tags: y_boat_core:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Builds the whole workspace to catch mistakes in any package
+      # and ensure any dependencies get built too.
+      #
+      # `colcon test --packages-above` tests the changed packages and
+      # everything that depends on them.
+      #
+      # Everything happens in one `docker run` because build/ and install/
+      # are run in the container's /workspace, and wouldn't persist between runs
+      - name: colcon build + test
+        env:
+          # Writes environment variables to be used in test selection
+          MODE: ${{ needs.changes.outputs.mode }}
+          PACKAGES: ${{ needs.changes.outputs.packages }}
+        run: |
+          TEST_SELECT=""
+          if [ "$MODE" = some ]; then
+            TEST_SELECT="--packages-above $PACKAGES"
+          fi
+          echo "mode=$MODE packages=${PACKAGES:-<none>}"
+
+          docker run --rm \
+            -e ROS_DISTRO=jazzy \
+            -e MODE="$MODE" \
+            -e TEST_SELECT="$TEST_SELECT" \
+            -v "${{ github.workspace }}/src:/workspace/src" \
+            y_boat_core:ci \
+            bash -c '
+              set -e
+              source "/opt/ros/$ROS_DISTRO/setup.bash"
+              apt-get update
+              rosdep update --rosdistro "$ROS_DISTRO"
+              rosdep install --from-paths src --ignore-src -y --rosdistro "$ROS_DISTRO"
+
+              colcon build --event-handlers console_direct+
+
+              if [ "$MODE" = none ]; then
+                echo "No ROS packages changed -- skipping tests."
+                exit 0
+              fi
+              # colcon test exits 0 even when tests fail; test-result is
+              # what prints the failure summary and fails the job.
+              colcon test --event-handlers console_direct+ $TEST_SELECT
+              colcon test-result --verbose
+            '

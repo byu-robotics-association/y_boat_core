@@ -63,6 +63,34 @@ All packages should be created inside src/nodes/
 
 Check out the tutorials in [ROS2 Demo](https://github.com/byu-robotics-association/y_robotics_ros2_demo)
 
+### Type Annotations
+Every function must declare types for its arguments and return value (e.g. `def main(args: list[str] | None = None) -> None:`). CI checks this with Ruff on every PR; run the same check locally from the repo root with:
+```bash
+pip install ruff==0.16.5
+ruff check src .github
+```
+
+#### Help with strong typed syntax
+In VS Code, install the recommended extensions when prompted (or search `@recommended` in the Extensions view). Missing annotations are then underlined as you type. Hover over one and click its rule code to open Ruff's explanation with a before/after example.
+
+```python
+# Syntax for declaring types when defining a function
+def int_to_string(parameter_name: int) -> str:
+    return str(parameter_name)
+
+# Syntax for declaring type on a variable
+my_string: str = int_to_string(5) # This isn't necessary, and isn't enforced in the tests, but it's still helpful sometimes.
+```
+
+It's also good to understand that adding these strong type declarations do not change the behavior of the code, it simply makes the code more readable and makes development easier.
+
+### Run Tests Before Opening a PR
+Every PR runs CI checks: the type annotation check above, a build of the Docker image and workspace, and the tests for each package the PR changes. Run the same checks locally with:
+```bash
+./scripts/test.sh boat_perception
+```
+Name the package(s) you changed; packages that depend on them are tested too. Run `./scripts/test.sh` with no arguments to test everything. The first run builds the Docker image and takes a few minutes; later runs are quick. See `./scripts/test.sh -h` for options.
+
 #### Sync with Git Changes
 The following command will sync your local environment with origin/main
 ```bash

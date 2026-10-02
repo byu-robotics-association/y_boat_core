@@ -1,0 +1,9 @@
+{
+  // Use the Ruff installed in environment instead of version packaged
+  // from the extension
+  "ruff.importStrategy": "fromEnvironment",
+
+  // Ruff's import sorting doesn't match the Google import order that
+  // ament_flake8 checks, so turn it off to keep it from breaking that test.
+  "ruff.organizeImports": false
+}
