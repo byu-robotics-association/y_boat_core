@@ -82,3 +82,4 @@ git pull origin <branch-name>
 ```
 This is the command to run on the boat to start everything at once. It doesn't open the terminal or pull the latest docker image
 
+Hey guys its dylan
