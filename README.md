@@ -89,6 +89,7 @@ For documentation on a specific package, take a look at its package README.
 | Package | Description | Documentation |
 |---|---|---|
 | `boat_perception` | Environment perception system | [`README.md`](src/nodes/boat_perception/README.md) |
+| `boat_image_processing` | YOLO model and image processing | [`README.md`](src/nodes/boat_image_processing/README.md) |
 
 ### Build a Package
 

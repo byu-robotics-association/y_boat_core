@@ -9,6 +9,12 @@
             "request": "debug_launch",
             "target": "/workspace/install/boat_perception/share/boat_perception/launch/boat_perception.launch.py",
             "type": "ros2"
+        },
+        {
+            "name": "ROS 2: Debug boat_image_processing",
+            "request": "debug_launch",
+            "target": "/workspace/install/boat_image_processing/share/boat_image_processing/launch/boat_image_processing.launch.py",
+            "type": "ros2"
         }
     ]
 }
