@@ -21,7 +21,9 @@
 				"redhat.vscode-yaml",
 				"ms-azuretools.vscode-docker",
 				"ms-vscode.cpptools",
-				"ms-vscode.cmake-tools"
+				"ms-vscode.cmake-tools",
+				"charliermarsh.ruff",
+				"ms-python.python"
 			],
 			"settings": {
       			"remote.autoForwardPorts": false,

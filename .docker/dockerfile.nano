@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     ros-${ROS_DISTRO}-velodyne \
     udev \
+    ros-${ROS_DISTRO}-vision-msgs \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR ${WORKSPACE}
