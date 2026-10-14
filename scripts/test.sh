@@ -63,6 +63,14 @@ if [ "${SKIP_RUFF}" = 0 ]; then
     ruff check src .github
 fi
 
+# Check that each package's setup.py matches its package.xml
+if ! python3 -c "import setuptools" 2> /dev/null; then
+    echo "setuptools not found. Install it with: pip install setuptools" >&2
+    exit 1
+fi
+echo "==> Checking package metadata (setup.py vs package.xml)"
+python3 scripts/check_package_metadata.py
+
 # Run docker build
 echo "==> Building ${IMAGE} from .docker/dockerfile.dev"
 docker build -f .docker/dockerfile.dev -t "${IMAGE}" .

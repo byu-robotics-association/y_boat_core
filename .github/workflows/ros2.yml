@@ -18,9 +18,14 @@ jobs:
             - uses: actions/checkout@v4
             - name: Check Type Annotations (Ruff)
               run: |
-                pip install ruff==0.16.5   
-                ruff check --output-format=github src    
-            
+                pip install ruff==0.16.5
+                ruff check --output-format=github src
+
+            - name: Check package metadata
+              run: |
+                pip install setuptools
+                python scripts/check_package_metadata.py
+
             - name: Run ROS Tests
               run: |
                 docker run --rm \
