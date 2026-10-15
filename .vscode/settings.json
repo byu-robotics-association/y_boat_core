@@ -1,0 +1,16 @@
+{
+    "ROS2.distro": "jazzy",
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/build/boat_perception",
+        "${workspaceFolder}/install/boat_perception/lib/python3.12/site-packages",
+        "/opt/ros/${env:ROS_DISTRO}/lib/python3.12/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/build/boat_perception",
+        "${workspaceFolder}/install/boat_perception/lib/python3.12/site-packages",
+        "/opt/ros/${env:ROS_DISTRO}/lib/python3.12/site-packages"
+    ],
+    "yaml.customTags": [
+        "!override sequence"
+    ]
+}

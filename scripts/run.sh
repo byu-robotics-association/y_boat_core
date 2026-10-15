@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# compose reads docker-compose.yml and .env from the project root
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 INTERACTIVE=0

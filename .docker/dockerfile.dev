@@ -2,9 +2,10 @@ ARG BASE_IMAGE=ros:jazzy-ros-base
 
 FROM ${BASE_IMAGE}
 
-ARG ROS_DISTRO=jazzy
-ARG WORKSPACE=/workspace
 
+ARG WORKSPACE=/workspace
+ENV ROS_DISTRO=jazzy
+ENV ROS_SOURCE=/opt/ros/jazzy/setup.bash
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Build tooling, plus MAVROS: the ROS 2 <-> ArduPilot bridge used by boat_control.
@@ -32,6 +33,12 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc \
 
 COPY .docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+WORKDIR ${WORKSPACE}
+
+COPY .docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+RUN echo 'source ${ROS_SOURCE}' >> /root/.bashrc
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

@@ -1,16 +1,17 @@
 FROM dustynv/ros:humble-ros-base-l4t-r32.7.1
 
-ARG ROS_DISTRO=humble
+
 ARG WORKSPACE=/workspace
+
+ENV ROS_DISTRO=humble
+ENV ROS_SOURCE=/opt/ros/humble/install/setup.bash
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Refresh expired Open Robotics GPG key before updating apt
 RUN apt-get update -o Acquire::AllowInsecureRepositories=true || true && \
     apt-get install -y --no-install-recommends curl ca-certificates gnupg && \
     curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu bionic main" > /etc/apt/sources.list.d/ros2.list
 
-# 2. Proceed with normal tool installation
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -25,7 +26,7 @@ WORKDIR ${WORKSPACE}
 
 COPY .docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-RUN echo 'source /opt/ros/humble/install/setup.bash' >> /root/.bashrc
+RUN echo 'source ${ROS_SOURCE}' >> /root/.bashrc
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
