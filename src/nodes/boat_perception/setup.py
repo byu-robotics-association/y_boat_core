@@ -1,5 +1,6 @@
-import os
 from glob import glob
+import os
+
 from setuptools import find_packages, setup
 
 package_name = 'boat_perception'
@@ -26,11 +27,11 @@ setup(
         ],
     },
     entry_points={
-    'console_scripts': [
-        'lidar_processor = boat_perception.lidar_processor:main',
-        'image_feed_node = boat_perception.image_feed.image_feed_node:main',
-        'image_rectifier_node = boat_perception.image_feed.image_rectifier:main',
-        'image_viewer_node = boat_perception.image_feed.image_viewer_node:main',
-    ],
-},
+        'console_scripts': [
+            'lidar_processor = boat_perception.lidar_processor:main',
+            'image_feed_node = boat_perception.image_feed.image_feed_node:main',
+            'image_rectifier_node = boat_perception.image_feed.image_rectifier:main',
+            'image_viewer_node = boat_perception.image_feed.image_viewer_node:main',
+        ],
+    },
 )

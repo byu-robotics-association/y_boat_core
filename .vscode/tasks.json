@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Foxglove bridge (live)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/foxglove.sh",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+    {
+      "label": "Foxglove bridge (sim time)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/foxglove.sh",
+      "args": ["-p", "use_sim_time:=true"],
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    }
+  ]
+}

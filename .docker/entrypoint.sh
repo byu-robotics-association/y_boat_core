@@ -1,16 +1,10 @@
 #!/bin/bash
 set -e
-
-source /opt/ros/${ROS_DISTRO}/setup.bash
-
-if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then
-  source "/opt/ros/${ROS_DISTRO}/setup.bash"
-elif [ -f "/opt/ros/${ROS_DISTRO}/install/setup.bash" ]; then
-  source "/opt/ros/${ROS_DISTRO}/install/setup.bash"
+if [ -n "$ROS_SOURCE" ] && [ -f "$ROS_SOURCE" ]; then
+    source "$ROS_SOURCE"
 fi
-
+# Source the workspace overlay if built
 if [ -f "/workspace/install/setup.bash" ]; then
-  source "/workspace/install/setup.bash"
+    source "/workspace/install/setup.bash"
 fi
-
 exec "$@"

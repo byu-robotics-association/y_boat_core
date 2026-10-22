@@ -1,0 +1,36 @@
+name: ROS2 CI
+
+on:
+    pull_request:
+        paths:
+            - 'src/**'
+            - '.ruff.toml'
+
+concurrency:
+  group: ros2-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+    test:
+        name: Lint & Test ROS2
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Check Type Annotations (Ruff)
+              run: |
+                pip install ruff==0.16.5   
+                ruff check --output-format=github src    
+            
+            - name: Run ROS Tests
+              run: |
+                docker run --rm \
+                -v "${{ github.workspace }}/src:/workspace/src" \
+                yrobotics/y_boat_core:latest \
+                bash -c '
+                    set -e
+                    source "/opt/ros/$ROS_DISTRO/setup.bash"
+                    colcon build --event-handlers console_direct+
+                    colcon test --event-handlers console_direct+
+                    colcon test-result --verbose
+                    '
+        

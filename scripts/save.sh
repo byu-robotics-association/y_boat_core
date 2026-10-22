@@ -2,16 +2,18 @@
 
 set -euo pipefail
 
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
 BRANCH="${1:-main}"
 IMAGE_TAG="${1:-latest}"
 # REPO_DIR="/path/to/repo"
 
-if [ -z "${1:-}"]; then
+if [ -z "${1:-}" ]; then
     echo "Pushing to main"
     docker build -t yrobotics/y_boat_core:latest -f ./.docker/dockerfile.dev .
     docker push yrobotics/y_boat_core:latest
 
-    docker build -t yrobotics/y_boat_core:latest-nano -f ./.docker/dockerfile.nano .
+    docker build --platform linux/arm64 -t yrobotics/y_boat_core:latest-nano -f ./.docker/dockerfile.nano .
     docker push yrobotics/y_boat_core:latest-nano
 fi 
 # else

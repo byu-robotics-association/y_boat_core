@@ -1,0 +1,9 @@
+{
+  // Recommend students install these extensions, since they'll help
+  // people know how to write strongly typed code.
+  // This will add quick fixes for return types, but not parameter types
+  "recommendations": [
+    "charliermarsh.ruff",
+    "ms-python.python"
+  ]
+}
