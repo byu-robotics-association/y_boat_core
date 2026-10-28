@@ -6,9 +6,34 @@
     privileged: true
     stdin_open: true
     tty: true
+    restart: unless-stopped
     volumes:
       - ${WORKSPACE_SRC:-./src}:${WORKSPACE_DIR:-/workspace}/src
       - /dev:/dev
     environment:
       - ROS_DISTRO=${ROS_DISTRO:-jazzy}
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-10}
+
+  mavros:
+    image: yrobotics/y_boat_core:${DOCKER_IMAGE}
+    container_name: mavros
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - ROS_DISTRO=${ROS_DISTRO:-jazzy}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-10}
+    command: >
+      ros2 launch mavros apm.launch
+      fcu_url:=${MAVROS_FCU_URL:-udp://:14551@192.168.2.2:14551}
+      tgt_system:=1
+      tgt_component:=1
+      log_output:=screen
+    volumes:
+      - ${WORKSPACE_SRC:-./src}:${WORKSPACE_DIR:-/workspace}/src
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'source /opt/ros/$${ROS_DISTRO}/setup.bash && ros2 topic list | grep -q /mavros/state'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+  
