@@ -2,6 +2,11 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+Vector3 = NDArray[np.float64]
+Matrix3 = NDArray[np.float64]
+FloatArray = NDArray[np.float64]
+
+
 @dataclass(frozen=True, slots=True)
 class Box2D:
     """Bounding box in rectified image pixel coordinates"""
@@ -42,8 +47,6 @@ class Detection:
         if not 0.0 <= self.confidence <= 1.0:
             raise ValueError(f'Detection confidence must be in [0, 1], got {self.confidence}')
 
-Vector3 = NDArray[np.float64]
-Matrix3 = NDArray[np.float64]
 @dataclass(frozen=True, slots=True, eq=False)
 class ObjectEstimate:
     """A detection with its estimated 3D position"""
