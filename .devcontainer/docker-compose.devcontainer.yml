@@ -1,6 +1,6 @@
 services:
   dev:
-    image: yrobotics/y_boat_core:dev
+    image: yrobotics/y_boat_core:latest
     network_mode: bridge
     command: sleep infinity
     volumes: !override
