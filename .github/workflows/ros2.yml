@@ -15,7 +15,7 @@ jobs:
         name: Lint & Test ROS2
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
             - name: Check Type Annotations (Ruff)
               run: |
                 pip install ruff==0.16.5   
