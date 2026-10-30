@@ -46,7 +46,7 @@ class ObjectAssociation(Node):
         self.camera_info = None
 
         self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
+        self.tf_listener = TransformListener(self.tf_buffer, self, spin_thread=True)
 
         detection_subscription = Subscriber(self, Detection2DArray, 'camera/detections')
         lidar_subscription = Subscriber(
