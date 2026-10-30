@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.utilities import try_shutdown
 from vision_msgs.msg import Detection3DArray, Detection3D, ObjectHypothesisWithPose
 
 FRAME_ID = "map"
@@ -81,7 +82,7 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        try_shutdown()
 
 if __name__ == '__main__':
     main()
