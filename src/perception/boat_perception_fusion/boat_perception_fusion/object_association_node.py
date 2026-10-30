@@ -7,8 +7,9 @@ from rclpy.utilities import try_shutdown
 from sensor_msgs.msg import CameraInfo, PointCloud2
 from std_msgs.msg import Header
 from vision_msgs.msg import Detection2DArray, Detection3DArray
+from visualization_msgs.msg import MarkerArray
 from tf2_ros import Buffer, TransformListener
-
+from rclpy.time import Time
 
 class ObjectAssociation(Node):
     """Read 2D detections and a lidar stream and turn them into 3D detections."""
@@ -72,6 +73,10 @@ class ObjectAssociation(Node):
         self.publisher = self.create_publisher(
             Detection3DArray, 'objects/detections', 10
         )
+
+        self.debug_publisher = self.create_publisher(
+            MarkerArray, 'objects/debug/selected_points', 10
+        )
         return
 
     def on_synced(self, det_msg: Detection2DArray, cloud_msg: PointCloud2) -> None:
@@ -80,6 +85,21 @@ class ObjectAssociation(Node):
         if self.camera_info is None:
             self.get_logger().warn('Waiting for camera_info', throttle_duration_sec=0.5)
             return
+
+        # make sure we're getting detections from the correct camera
+        if det_msg.header.frame_id != self.camera_info.header.frame_id:
+            self.get_logger().warn(
+                f'Detection frame "{det_msg.header.frame_id}" does not match camera frame '
+                f'"{self.camera_info.header.frame_id}"; check the detector copies the image header',
+                throttle_duration_sec=10.0)
+
+        # get latest transform from cloud to cam
+        tf = self.tf_buffer.lookup_transform(self.camera_info.header.frame_id, cloud_msg.header.frame_id, Time())
+
+        # we can publish our selected points for each bounding box to this debug topic so we can see it in foxglove
+        msg = MarkerArray()
+        self.debug_publisher.publish(msg)
+        
         # right now, this is just going to publish an empty detection array
         msg = Detection3DArray()
         msg.header = Header(
