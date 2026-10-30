@@ -7,6 +7,7 @@ from rclpy.utilities import try_shutdown
 from sensor_msgs.msg import CameraInfo, PointCloud2
 from std_msgs.msg import Header
 from vision_msgs.msg import Detection2DArray, Detection3DArray
+from tf2_ros import Buffer, TransformListener
 
 
 class ObjectAssociation(Node):
@@ -43,6 +44,9 @@ class ObjectAssociation(Node):
         queue_size = int(queue_size_value)
 
         self.camera_info = None
+
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
         detection_subscription = Subscriber(self, Detection2DArray, 'camera/detections')
         lidar_subscription = Subscriber(
