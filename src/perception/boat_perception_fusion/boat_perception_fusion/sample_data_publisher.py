@@ -2,8 +2,22 @@ import rclpy
 from rclpy.node import Node
 from vision_msgs.msg import Detection3DArray, Detection3D, ObjectHypothesisWithPose
 
+FRAME_ID = "map"
+
+BUOY_WIDTH = 0.5
+BUOY_DEPTH = 0.5
+BUOY_HEIGHT = 1.0
+
+SAMPLE_BUOYS = [
+    ("buoy_1", "red_buoy", -1.25, 5.0),
+    ("buoy_2", "green_buoy", 1.25, 5.0),
+    ("buoy_3", "red_buoy", -1.25, 20.0),
+    ("buoy_4", "green_buoy", 1.25, 20.0)
+]
+
 
 class SampleDataPublisher(Node):
+    """Publish fake buoy detections for navigation testing."""
     def __init__(self):
         super().__init__('sample_data_publisher')
 
@@ -18,24 +32,20 @@ class SampleDataPublisher(Node):
         self.get_logger().info('Sample data publisher started')
 
     def publish_sample_data(self):
+        """Publish sample buoy positions to the 'objects/detections' topic."""
         msg = Detection3DArray()
 
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = "map"
-
-        buoy_1 = self.create_buoy(msg.header, "buoy_1", "red_buoy", -1.25, 5.0, 0.0)
-        buoy_2 = self.create_buoy(msg.header, "buoy_2", "green_buoy", 1.25, 5.0, 0.0)
-        buoy_3 = self.create_buoy(msg.header, "buoy_3", "red_buoy", -1.25, 20.0, 0.0)
-        buoy_4 = self.create_buoy(msg.header, "buoy_4", "green_buoy", 1.25, 20.0, 0.0)
-
-        msg.detections.append(buoy_1)
-        msg.detections.append(buoy_2)
-        msg.detections.append(buoy_3)
-        msg.detections.append(buoy_4)
+        msg.header.frame_id = FRAME_ID
+        
+        for buoy_id, class_id, x, y in SAMPLE_BUOYS:
+            buoy = self.create_buoy(msg.header, buoy_id, class_id, x, y)
+            msg.detections.append(buoy)
 
         self.publisher.publish(msg)
 
-    def create_buoy(self, header, buoy_id, class_id, x, y, z):
+    def create_buoy(self, header, buoy_id, class_id, x, y, z=0.0):
+        """Create and return a buoy of type Detection3D."""
         buoy = Detection3D()
         buoy.header = header
         buoy.id = buoy_id
@@ -54,9 +64,9 @@ class SampleDataPublisher(Node):
         buoy.bbox.center.position.y = y
         buoy.bbox.center.position.z = z
 
-        buoy.bbox.size.x = 0.5
-        buoy.bbox.size.y = 0.5
-        buoy.bbox.size.z = 1.0
+        buoy.bbox.size.x = BUOY_WIDTH
+        buoy.bbox.size.y = BUOY_DEPTH
+        buoy.bbox.size.z = BUOY_HEIGHT
 
         return buoy
 
