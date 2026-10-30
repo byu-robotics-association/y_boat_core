@@ -1,15 +1,19 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from typing import Self
+
 import numpy as np
 from numpy.typing import NDArray
 
 Vector3 = NDArray[np.float64]
 Matrix3 = NDArray[np.float64]
 FloatArray = NDArray[np.float64]
+BoolArray = NDArray[np.bool_]
 
 
 @dataclass(frozen=True, slots=True)
 class Box2D:
-    """Bounding box in rectified image pixel coordinates"""
+    """Bounding box in rectified image pixel coordinates."""
+
     cx: float
     cy: float
     width: float
@@ -17,7 +21,22 @@ class Box2D:
 
     def __post_init__(self) -> None:
         if self.width < 0 or self.height < 0:
-            raise ValueError(f'Box size must be non-negative, got {self.width}x{self.height}')
+            raise ValueError(
+                f'Box size must be non-negative, got {self.width}x{self.height}'
+            )
+
+    def shrunk(self, fraction: float) -> Self:
+        """
+        Return a copy with `fraction` of the width and height trimmed from each side.
+
+        fraction: 0.1 trims 10% from each side (keeping the inner 80%);
+                  negative values pad the box outward instead.
+        """
+        if fraction >= 0.5:
+            raise ValueError(f'shrink fraction must be less than 0.5, got {fraction}')
+        scale = 1.0 - 2.0 * fraction
+        return replace(self, width=self.width * scale, height=self.height * scale)
+
     @property
     def left(self) -> float:
         return self.cx - self.width / 2
@@ -37,19 +56,24 @@ class Box2D:
 
 @dataclass(frozen=True, slots=True)
 class Detection:
-    """A single 2D object detection"""
+    """A single 2D object detection."""
+
     box: Box2D
     class_id: str
     confidence: float
-    id: str = ''
+    detection_id: str = ''
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError(f'Detection confidence must be in [0, 1], got {self.confidence}')
+            raise ValueError(
+                f'Detection confidence must be in [0, 1], got {self.confidence}'
+            )
+
 
 @dataclass(frozen=True, slots=True, eq=False)
 class ObjectEstimate:
-    """A detection with its estimated 3D position"""
+    """A detection with its estimated 3D position."""
+
     detection: Detection
     position: Vector3
     size: Vector3
