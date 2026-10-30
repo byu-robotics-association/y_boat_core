@@ -1,6 +1,6 @@
 import numpy as np
 
-from .types import FloatArray
+from .types import BoolArray, Box2D, FloatArray
 
 
 def require_shape(name: str, array: FloatArray, shape: tuple[int | None, ...]) -> None:
@@ -73,3 +73,16 @@ def project_points(
     pixels[in_front] = projected[:, :2] / projected[:, 2:3]  # divide (u', v') by w'
 
     return pixels
+
+
+def points_in_box(pixels: FloatArray, box: Box2D) -> BoolArray:
+    """
+    Mask of projected points that fall inside a bounding box.
+
+    pixels:  (N, 2) pixel coordinates (u, v) from project_points;
+             NaN rows (points at or behind the camera) are never inside
+    box:     bounding box in rectified image pixels;
+             apply Box2D.shrunk() first to trim edges
+    returns  (N,) boolean mask, True where the point is inside the box (edges inclusive)
+    """
+    pass
