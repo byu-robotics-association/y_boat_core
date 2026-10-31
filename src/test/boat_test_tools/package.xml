@@ -3,7 +3,7 @@
 <package format="3">
   <name>boat_test_tools</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Nodes for testing and simulation</description>
   <maintainer email="samuelfvelasco@gmail.com">root</maintainer>
   <license>Apache-2.0</license>
 

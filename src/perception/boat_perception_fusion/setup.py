@@ -27,8 +27,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'object_association_node = boat_perception_fusion.object_association_node:main',
-            'sample_data_publisher = boat_perception_fusion.sample_data_publisher:main'
+            'object_association_node = boat_perception_fusion.object_association_node:main'
         ],
     },
 )

@@ -1,24 +1,25 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.utilities import try_shutdown
-from vision_msgs.msg import Detection3DArray, Detection3D, ObjectHypothesisWithPose
+from vision_msgs.msg import Detection3D, Detection3DArray, ObjectHypothesisWithPose
 
-FRAME_ID = "map"
+FRAME_ID = 'map'
 
 BUOY_WIDTH = 0.5
 BUOY_DEPTH = 0.5
 BUOY_HEIGHT = 1.0
 
 SAMPLE_BUOYS = [
-    ("buoy_1", "red_buoy", -1.25, 5.0),
-    ("buoy_2", "green_buoy", 1.25, 5.0),
-    ("buoy_3", "red_buoy", -1.25, 20.0),
-    ("buoy_4", "green_buoy", 1.25, 20.0)
+    ('buoy_1', 'red_buoy', -1.25, 5.0),
+    ('buoy_2', 'green_buoy', 1.25, 5.0),
+    ('buoy_3', 'red_buoy', -1.25, 20.0),
+    ('buoy_4', 'green_buoy', 1.25, 20.0)
 ]
 
 
 class SampleDataPublisher(Node):
     """Publish fake buoy detections for navigation testing."""
+
     def __init__(self):
         super().__init__('sample_data_publisher')
 
@@ -38,7 +39,7 @@ class SampleDataPublisher(Node):
 
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = FRAME_ID
-        
+
         for buoy_id, class_id, x, y in SAMPLE_BUOYS:
             buoy = self.create_buoy(msg.header, buoy_id, class_id, x, y)
             msg.detections.append(buoy)
@@ -71,6 +72,7 @@ class SampleDataPublisher(Node):
 
         return buoy
 
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -83,6 +85,7 @@ def main(args=None):
     finally:
         node.destroy_node()
         try_shutdown()
+
 
 if __name__ == '__main__':
     main()
