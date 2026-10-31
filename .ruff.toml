@@ -1,14 +1,38 @@
-# Ruff is used here *only* to check that functions have type annotations.
-# Code style is enforced by each package's ament_flake8 test (run via
-# `colcon test`), whose ROS 2 conventions -- single quotes, Google import
-# order, 99-char lines -- conflict with Ruff's defaults, so no other rule
-# groups are enabled.
+# Ruff formats and lints Python to match the ament_flake8 and ament_pep257 tests run by
+# `colcon test`: 99-character lines, single quotes, Google-style import order, and
+# docstrings with the summary on the line after the opening quotes.
+#
+# The ament tests remain the source of truth. Ruff reimplements their rules and differs in
+# a few cases (e.g. A003, builtin-named class attributes) so the flake8 and pep257 tests
+# should be run before merging.
+#
+# Ruff also requires type annotations on functions. Strong typing makes development easier,
+# since autocomplete can show the methods available on a given object.
 
-# Strong typing enforcement makes development easier since autocomplete can
-# help with the methods available on a given object.
+[format]
+quote-style = "single"  # flake8-quotes (Q000) requires single quotes for strings
 
 [lint]
-select = ["ANN"]
+select = ["E", "W", "F", "Q", "D", "I", "A", "C4"]
+# Same docstring rules ament ignores. This leaves D213 active: multi-line docstrings
+# put the summary on the line after the opening quotes.
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203", "D212", "D404"]
+# Don't auto-delete unused imports/variables on save while code is still being written.
+unfixable = ["F401", "F841"]
+
+[lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "double"
+docstring-quotes = "double"
+
+[lint.isort]
+# Matches flake8-import-order's "google" style: one sorted list per section, with
+# `import x` and `from x import y` interleaved by module name, ignoring case.
+# Workspace packages are intentionally not marked first-party, because ament_flake8
+# sorts them together with other third-party packages.
+force-sort-within-sections = true
+case-sensitive = false
+order-by-type = false
 
 [lint.per-file-ignores]
 # The linter tests `ros2 pkg create` generates in every package's test/ have
