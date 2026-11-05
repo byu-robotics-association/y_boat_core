@@ -32,13 +32,13 @@
         "reportMissingParameterType": "none",
         "reportUnknownLambdaType": "none"
     },
-    
+    "files.autoSave": "onFocusChange",
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-          "source.fixAll.ruff": "explicit",
-          "source.organizeImports.ruff": "explicit"
+          "source.fixAll.ruff": "always",
+          "source.organizeImports.ruff": "always"
         }
     }
 }
