@@ -1,14 +1,20 @@
+"""Entry point for the boat LiDAR processor ROS 2 node."""
+
 import rclpy
 from rclpy.node import Node
 
 
 class LidarProcessor(Node):
+    """Represent the boat LiDAR processor node."""
+
     def __init__(self) -> None:
+        """Initialize the ROS node and log that it has started."""
         super().__init__('lidar_processor')
         self.get_logger().info('Lidar processor started')
 
 
 def main(args: list[str] | None = None) -> None:
+    """Start the node and release ROS resources when it stops."""
     rclpy.init(args=args)
     node = LidarProcessor()
     try:
