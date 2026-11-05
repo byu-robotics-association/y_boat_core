@@ -10,7 +10,7 @@ from vision_msgs.msg import Detection3DArray
 
 class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2.
     def __init__(self):  # Runs when this node is created.
-        super().__init__('Bouy_Pathfinder')  # Gives this node its ROS 2 name.
+        super().__init__('Buoy_Pathfinder')  # Gives this node its ROS 2 name.
         self._client = ActionClient(self, NavigateToPose, 'navigate_to_pose')  # Connects to Nav2's goal action.
         self.obstacles = {}  # Stores the latest detected buoy positions.
         self.detection_subscriber = self.create_subscription(  # Creates a listener for the detections topic.
@@ -21,18 +21,18 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
         )
 
     def detections_callback(self, msg): # Defines a function to pull data from topic message
-        for bouy in msg.detections:
-            bouy_id = bouy.id
-            x = bouy.bbox.center.position.x
-            y = bouy.bbox.center.position.y
+        for buoy in msg.detections:
+            buoy_id = buoy.id
+            x = buoy.bbox.center.position.x
+            y = buoy.bbox.center.position.y
 
-            self.obstacles[bouy_id] = (x, y)
+            self.obstacles[buoy_id] = (x, y)
 
-        bouy1 = self.obstacles['buoy_1']
-        bouy2 = self.obstacles['buoy_2']
+        buoy1 = self.obstacles['buoy_1']
+        buoy2 = self.obstacles['buoy_2']
 
-        x_goal = (bouy1[0] + bouy2[0]) / 2
-        y_goal = (bouy1[1] + bouy2[1]) / 2
+        x_goal = (buoy1[0] + buoy2[0]) / 2
+        y_goal = (buoy1[1] + buoy2[1]) / 2
 
         self.get_logger().info(
             f"Calculated waypoint: ({x_goal}, {y_goal})"
@@ -44,29 +44,29 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
         goal = NavigateToPose.Goal()  # Creates an empty Nav2 goal.
         goal.pose.header.frame_id = 'map'  # Says the goal coordinates are expressed in the map frame.
         goal.pose.header.stamp = self.get_clock().now().to_msg() # getting time?
-        # Get next bouys position
-        bouy1_x = self.obstacles['bouy_1'][0]
-        bouy1_y = self.obstacles['bouy_1'][1]
-        bouy2_x = self.obstacles['bouy_2'][0]
-        bouy2_y = self.obstacles['bouy_2'][1]
-        # Get future bouys position
-        bouy3_x = self.obstacles['bouy_3'][0]
-        bouy3_y = self.obstacles['bouy_3'][1]
-        bouy4_x = self.obstacles['bouy_4'][0]
-        bouy4_y = self.obstacles['bouy_4'][1]
-        # Set goal pose as midoint between bouys
+        # Get next buoys position
+        buoy1_x = self.obstacles['buoy_1'][0]
+        buoy1_y = self.obstacles['buoy_1'][1]
+        buoy2_x = self.obstacles['buoy_2'][0]
+        buoy2_y = self.obstacles['buoy_2'][1]
+        # Get future buoys position
+        buoy3_x = self.obstacles['buoy_3'][0]
+        buoy3_y = self.obstacles['buoy_3'][1]
+        buoy4_x = self.obstacles['buoy_4'][0]
+        buoy4_y = self.obstacles['buoy_4'][1]
+        # Set goal pose as midoint between buoys
         
-        x_goal = (bouy1_x + bouy2_x)/2
-        y_goal = (bouy1_y + bouy2_y)/2
+        x_goal = (buoy1_x + buoy2_x)/2
+        y_goal = (buoy1_y + buoy2_y)/2
         goal.pose.pose.position.x = x_goal  # Sets the goal's x position in meters.
         goal.pose.pose.position.y = y_goal  # Sets the goal's y position in meters.
         goal.pose.pose.position.z = 0.0  # Sets the goal's z position to zero for 2D navigation.
         
 
-        # Set goal angle part of pose as angle to next set of bouys, it is really weird how this works
+        # Set goal angle part of pose as angle to next set of buoys, it is really weird how this works
         # but basically we need to specify
-        x_face = (bouy3_x + bouy4_x)/2
-        y_face = (bouy3_y + bouy4_y)/2
+        x_face = (buoy3_x + buoy4_x)/2
+        y_face = (buoy3_y + buoy4_y)/2
         yaw = math.atan2(x_face, y_face)
         goal.pose.pose.orientation.x = 0.0
         goal.pose.pose.orientation.y = 0.0 # x and y are always zero because we never tilt around those axes
