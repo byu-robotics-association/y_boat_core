@@ -4,7 +4,7 @@ This is the official BYU Robotics Association Boat Software, including all firmw
 ### Prereqs
 - Install Git on your system. Download for [Windows](https://git-scm.com/install/windows), [MacOS](https://git-scm.com/install/mac), [Linux](https://git-scm.com/install/linux)
 
-- Install Docker Desktop on your system. Download for [Windows](https://docs.docker.com/desktop/setup/install/windows-install/), [MacOS](https://docs.docker.com/desktop/setup/install/mac-install/), [Linux](https://docs.docker.com/desktop/setup/install/linux/)
+- Install Docker Desktop on your system. Download for [Windows](https://docs.docker.com/desktop/setup/install/windows-install/), [MacOS](https://docs.docker.com/desktop/setup/install/mac-install/), [Linux](https://docs.docker.com/engine/)
 
 > Windows Users, Ensure WSL is installed on your computer. Run this command in a powershell terminal
 >```powershell
