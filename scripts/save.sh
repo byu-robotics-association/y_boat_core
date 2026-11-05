@@ -12,9 +12,6 @@ if [ -z "${1:-}" ]; then
     echo "Pushing to main"
     docker build -t yrobotics/y_boat_core:latest -f ./.docker/dockerfile.dev .
     docker push yrobotics/y_boat_core:latest
-
-    docker build --platform linux/arm64 -t yrobotics/y_boat_core:latest-nano -f ./.docker/dockerfile.nano .
-    docker push yrobotics/y_boat_core:latest-nano
 fi 
 # else
 #     echo "Pushing Branch" 
