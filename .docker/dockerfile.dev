@@ -20,7 +20,11 @@ RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-nav2-bringup \
     ros-${ROS_DISTRO}-foxglove-bridge \
     ros-${ROS_DISTRO}-vision-msgs \
+    ros-${ROS_DISTRO}-mavros \
+    ros-${ROS_DISTRO}-mavros-extras \
     && rm -rf /var/lib/apt/lists/* 
+
+RUN /opt/ros/${ROS_DISTRO}/lib/mavros/install_geographiclib_datasets.sh
 
 WORKDIR ${WORKSPACE}
 
