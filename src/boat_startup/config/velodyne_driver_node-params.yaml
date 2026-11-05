@@ -1,0 +1,29 @@
+# These are default parameters set by AI, Adjust as needed
+velodyne_driver_node:
+  ros__parameters:
+    device_ip: "" # Leave empty for now so we can connect to lidar easily (potentially change to 192.168.1.200 once we have tested)
+    gps_time: false
+    time_offset: 0.0
+    enabled: true
+    read_once: false
+    read_fast: false
+    repeat_delay: 0.0
+    frame_id: velodyne
+    model: 32C
+    rpm: 600.0
+    port: 2368
+    timestamp_first_packet: false
+velodyne_transform_node:
+  ros__parameters:
+    calibration: /opt/ros/jazzy/share/velodyne_pointcloud/params/VeloView-VLP-32C.yaml
+    model: 32C
+    min_range: 0.9
+    max_range: 200.0
+    view_direction: 0.0
+    fixed_frame: ""
+    target_frame: ""
+    organize_cloud: true
+velodyne_laserscan_node:
+  ros__parameters:
+    ring: -1
+    resolution: 0.007
