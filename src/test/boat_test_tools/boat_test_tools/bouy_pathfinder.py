@@ -3,6 +3,7 @@ import math  # Provides sine and cosine for converting heading into a quaternion
 import rclpy  # Provides the ROS 2 Python tools.
 from rclpy.node import Node  # Provides the base class for a ROS 2 node.
 from rclpy.action import ActionClient  # Provides a client for sending ROS 2 action goals.
+from rclpy.utilities import try_shutdown
 from nav2_msgs.action import NavigateToPose  # Provides Nav2's "navigate to a pose" action type.
 from action_msgs.msg import GoalStatus  # Provides names for action result statuses.
 from vision_msgs.msg import Detection3DArray
@@ -17,7 +18,26 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
         'objects/detections',  # Matches the publisher's topic name.
         self.detections_callback,  # Calls this method whenever a message arrives.
         10  # Sets the message queue size.
-        )   
+        )
+
+    def detections_callback(self, msg): # Defines a function to pull data from topic message
+        for bouy in msg.detections:
+            bouy_id = bouy.id
+            x = bouy.bbox.center.position.x
+            y = bouy.bbox.center.position.y
+
+            self.obstacles[bouy_id] = (x, y)
+
+        bouy1 = self.obstacles['buoy_1']
+        bouy2 = self.obstacles['buoy_2']
+
+        x_goal = (bouy1[0] + bouy2[0]) / 2
+        y_goal = (bouy1[1] + bouy2[1]) / 2
+
+        self.get_logger().info(
+            f"Calculated waypoint: ({x_goal}, {y_goal})"
+        )
+    
     def send_goal(self, x, y, yaw):  # Defines a function to send a goal position and heading.
         self.get_logger().info('Waiting for Nav2...')  # Prints a message while waiting for Nav2.
         self._client.wait_for_server()  # Waits until Nav2's action server is available.
@@ -79,10 +99,15 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
 def main(args=None):  # Defines the function that starts and stops this ROS 2 program.
     rclpy.init(args=args)  # Initializes ROS 2 for this program.
     node = Nav2GoalSender()  # Creates this program's ROS 2 node.
-    node.send_goal(x=2.0, y=1.0, yaw=0.0)  # Sends an example goal 2 m east, 1 m north, facing along +x.
-    rclpy.spin(node)  # Keeps the node running so it can process Nav2's responses and feedback.
-    node.destroy_node()  # Cleans up the node when it stops.
-    rclpy.shutdown()  # Shuts down ROS 2 for this program.
+    # node.send_goal(x=2.0, y=1.0, yaw=0.0)  # Sends an example goal 2 m east, 1 m north, facing along +x.
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        try_shutdown()
 
 if __name__ == '__main__':  # Checks whether this file was run directly.
     main()  # Starts the ROS 2 node.

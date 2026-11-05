@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'sample_data_publisher = boat_test_tools.sample_data_publisher:main',
+            'bouy_pathfinder = boat_test_tools.bouy_pathfinder:main',
         ],
     },
 )
