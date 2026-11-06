@@ -16,7 +16,7 @@ quote-style = "single"  # flake8-quotes (Q000) requires single quotes for string
 select = ["E", "W", "F", "Q", "D", "I", "A", "C4", "ANN"]
 # Same docstring rules ament ignores. This leaves D213 active: multi-line docstrings
 # put the summary on the line after the opening quotes.
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203", "D212", "D404", ANN401"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D203", "D212", "D404", "ANN401"]
 # Don't auto-delete unused imports/variables on save while code is still being written.
 unfixable = ["F401", "F841"]
 
