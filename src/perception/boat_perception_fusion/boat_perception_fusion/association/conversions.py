@@ -5,6 +5,7 @@ from sensor_msgs_py import point_cloud2
 from vision_msgs.msg import Detection2DArray, Detection3DArray
 from .types import Detection, Box2D, FloatArray, ObjectEstimate
 from tf2_ros import TransformStamped
+from scipy.spatial.transform import Rotation
 
 # CONVERSION #1 - Convert det_msg into a list of detection objects
 
@@ -80,14 +81,16 @@ def TF_to_transform_matrix(tf: TransformStamped) -> FloatArray:
     PARAMETERS
     tf: The transform data created by the tf2 package
     """
-    transform_matrix:FloatArray[0, 0] = tf.transform.translation.x
-    transform_matrix[1, 1] = tf.transform.translation.y
-    transform_matrix[2, 2] = tf.transform.translation.z
-    transform_matrix[:, 0] = tf.transform.rotation.x
-    transform_matrix[:, 1] = tf.transform.rotation.y
-    transform_matrix[:, 2] = tf.transform.rotation.z
-    transform_matrix[:, 3] = tf.transform.rotation.w
 
+    quaternion = tf.transform.rotation
+    rotation_object = Rotation.from_quat([quaternion.x, quaternion.y, quaternion.z, quaternion.w])
+    transform_matrix:FloatArray = np.zeros((4, 4), dtype=np.float64)
+    transform_matrix[:3, :3] = rotation_object.as_matrix()
+    transform_matrix[0, 3] = tf.transform.translation.x
+    transform_matrix[1, 3] = tf.transform.translation.y
+    transform_matrix[2, 3] = tf.transform.translation.z
+    transform_matrix[3, 3] = 1
+    
     return transform_matrix
 
 # CONVERSION #5 - Convert ObjectEstimate into Detection3D, and collect it into a Detection3DArray
