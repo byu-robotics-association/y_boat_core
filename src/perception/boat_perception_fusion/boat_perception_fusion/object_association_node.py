@@ -9,6 +9,7 @@ from std_msgs.msg import Header
 from vision_msgs.msg import Detection2DArray, Detection3DArray
 from visualization_msgs.msg import MarkerArray
 from tf2_ros import Buffer, TransformListener
+from geometry_msgs.msg import TransformStamped
 from rclpy.time import Time
 
 class ObjectAssociation(Node):
@@ -94,7 +95,7 @@ class ObjectAssociation(Node):
                 throttle_duration_sec=10.0)
 
         # get latest transform from cloud to cam
-        tf = self.tf_buffer.lookup_transform(self.camera_info.header.frame_id, cloud_msg.header.frame_id, Time())
+        tf: TransformStamped = self.tf_buffer.lookup_transform(self.camera_info.header.frame_id, cloud_msg.header.frame_id, Time())
 
         # we can publish our selected points for each bounding box to this debug topic so we can see it in foxglove
         msg = MarkerArray()

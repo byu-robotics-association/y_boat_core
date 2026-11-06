@@ -85,4 +85,12 @@ def points_in_box(pixels: FloatArray, box: Box2D) -> BoolArray:
              apply Box2D.shrunk() first to trim edges
     returns  (N,) boolean mask, True where the point is inside the box (edges inclusive)
     """
-    pass
+
+    # Run data validation on input parameters
+    require_shape('pixels', pixels, (None, 2))
+    
+    inside_horizontal = (pixels[:, 0] >= box.left) & (pixels[:, 0] <= box.right)
+    inside_vertical = (pixels[:, 1] <= box.bottom) & (pixels[:, 1] >= box.top)
+    point_in_box_true = inside_horizontal & inside_vertical
+
+    return point_in_box_true
