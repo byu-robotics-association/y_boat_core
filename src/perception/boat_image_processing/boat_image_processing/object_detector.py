@@ -15,14 +15,14 @@ class ObjectDetector(Node):
             'camera/image_rect',
             self.on_image,
             # Standard default for image frames.
-            qos_profile_sensor_data  # `BEST_EFFORT`, `KEEP_LAST`, `depth=5`
+            qos_profile_sensor_data,  # `BEST_EFFORT`, `KEEP_LAST`, `depth=5`
         )
 
         self.detection_publisher = self.create_publisher(
             Detection2DArray,
             'camera/detections',
-            # Default is `RELIABLE`, which is probably what object_association will want.
-            10  # `RELIABLE`, `KEEP_LAST`, `depth=10`
+            # Default is `RELIABLE`, which is probably what object_association will want
+            10,  # `RELIABLE`, `KEEP_LAST`, `depth=10`
         )
 
     def on_image(self, image: Image) -> None:
