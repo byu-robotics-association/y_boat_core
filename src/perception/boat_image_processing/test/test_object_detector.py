@@ -1,9 +1,9 @@
 import time
-from typing import Callable, Iterator
+from collections.abc import Callable, Iterator
 
-from boat_image_processing.object_detector import ObjectDetector
 import pytest
 import rclpy
+from boat_image_processing.object_detector import ObjectDetector
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data

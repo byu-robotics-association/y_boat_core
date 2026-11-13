@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 import numpy as np
 
@@ -11,7 +10,7 @@ class ImageFeed(ABC):
     def open(self) -> None: ...
 
     @abstractmethod
-    def read(self) -> Optional[np.ndarray]: ...
+    def read(self) -> np.ndarray | None: ...
 
     @abstractmethod
     def close(self) -> None: ...

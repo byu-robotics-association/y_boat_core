@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -23,7 +22,7 @@ class SyntheticFeed(ImageFeed):
     def close(self) -> None:
         self._is_open = False
 
-    def read(self) -> Optional[np.ndarray]:
+    def read(self) -> np.ndarray | None:
         if not self._is_open:
             return None
         frame = np.full((self._h, self._w, 3), (120, 70, 20), np.uint8)  # BGR: blue-ish water

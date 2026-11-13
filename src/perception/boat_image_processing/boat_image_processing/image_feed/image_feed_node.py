@@ -1,8 +1,10 @@
+import yaml
+from pathlib import Path
 import rclpy # Ros library
 from cv_bridge import CvBridge # converts image to Ros typle image
 from rclpy.node import Node # node base class
-from sensor_msgs.msg import Image # image data type
-from boat_perception.image_feed import FEED_FACTORIES, ImageFeed # feed types
+from sensor_msgs.msg import CameraInfo, Image # image data type
+from boat_image_processing.image_feed import FEED_FACTORIES, ImageFeed # feed types
 
 REOPEN_AFTER_FAILURES = 30 # how many times reading can fail before restarting
 
@@ -29,6 +31,10 @@ class ImageFeedNode(Node):
         self.declare_parameter("image_fps", 30)
         self.declare_parameter("image_fourcc", "MJPG")
         
+        self.declare_parameter("camera_info_file", "")
+        self._info_publisher = self.create_publisher(CameraInfo, "camera/camera_info", 10)
+        self._camera_info = self._load_camera_info()
+        
         feed_type = self.get_parameter("feed_type").value
         if feed_type not in FEED_FACTORIES:
             raise ValueError(
@@ -41,6 +47,7 @@ class ImageFeedNode(Node):
         self._bridge = CvBridge() # convert CV array to Image
         self._frame_id = self.get_parameter("frame_id").value
         self._publisher = self.create_publisher(Image, "camera/image_raw", 10)
+        
         
         self._frames_published = 0
         self._failures = 0
@@ -57,16 +64,31 @@ class ImageFeedNode(Node):
                 self._reopen_feed()
             return
         self._failures = 0
+        
+        h, w = frame.shape[:2]
+        if (w, h) != (self._camera_info.width, self._camera_info.height):
+            self.get_logger().warn(
+                f"Mismatch between frame shape {w}x{h} and "
+                f"calibration which is {self._camera_info.width}x{self._camera_info.height}",
+                throttle_duration_sec = 5.0
+            )
 
         msg = self._bridge.cv2_to_imgmsg(frame, encoding="bgr8") #converts frame in cv to Image
-        msg.header.stamp = self.get_clock().now().to_msg()
+        stamp = self.get_clock().now().to_msg()
+        msg.header.stamp = stamp
         msg.header.frame_id = self._frame_id
+        
+        self._camera_info.header.stamp = stamp
+        self._camera_info.header.frame_id = self._frame_id
+        
         self._publisher.publish(msg)
+        self._info_publisher.publish(self._camera_info)
         
         self._frames_published += 1
         self.get_logger().info(
             f"Published {self._frames_published} frames so far", throttle_duration_sec=5.0 
         )
+        
         
     def _reopen_feed(self) -> None:
         self.get_logger().warn(f"Reached {self._failures}/{REOPEN_AFTER_FAILURES} empty reads; reopening feed.")
@@ -77,6 +99,44 @@ class ImageFeedNode(Node):
         except RuntimeError as exc:
             # after another set of empty reads, it will try again
             self.get_logger().error(str(exc), throttle_duration_sec=5.0)
+            
+    def _load_camera_info(self) -> CameraInfo:
+        path = self.get_parameter("camera_info_file").value
+        info = CameraInfo()
+        
+        if path:
+            file = Path(path).expanduser()
+            if not file.is_file():
+                raise FileNotFoundError(f"camera_info_file '{path}' does not exist")
+            # camera calibration stuff i dont understand, but uses YAML format
+            data = yaml.safe_load(file.read_text())
+            info.width = data["image_width"]
+            info.height = data["image_height"]
+            info.distortion_model = data["distortion_model"]
+            info.d = [float(x) for x in data["distortion_coefficients"]["data"]]
+            info.k = [float(x) for x in data["camera_matrix"]["data"]]
+            info.r = [float(x) for x in data["rectification_matrix"]["data"]]
+            info.p = [float(x) for x in data["projection_matrix"]["data"]]
+            self.get_logger().info(f"Loaded camera calibration from {path}")
+            return info
+        
+        width = self.get_parameter("image_width").value
+        height = self.get_parameter("image_height").value
+        fx = fy = float(width)
+        cx, cy = width / 2.0, height / 2.0
+
+        info.width = width
+        info.height = height
+        info.distortion_model = "plumb_bob"
+        info.d = [0.0] * 5
+        info.k = [fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0]
+        info.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        info.p = [fx, 0.0, cx, 0.0, 0.0, fy, cy, 0.0, 0.0, 0.0, 1.0, 0.0]
+        self.get_logger().warn(
+            "No camera_info_file set: publishing PLACEHOLDER intrinsics. "
+            "Do not trust 3D/pose results until you calibrate."
+        )
+        return info
             
     def destroy_node(self) -> bool:
         self._feed.close() # kill the camera feed

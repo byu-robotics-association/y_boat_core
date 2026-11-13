@@ -1,3 +1,6 @@
+
+# CAN BE REMOVED ONCE WE GET THE IMAGE NODE WORKING WITH FOXGLOVE
+
 import os
 import threading
 import time

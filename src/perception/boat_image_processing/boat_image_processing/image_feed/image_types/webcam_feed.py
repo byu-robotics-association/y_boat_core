@@ -1,4 +1,3 @@
-from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -11,7 +10,7 @@ class WebcamFeed(ImageFeed):
 
     def __init__(
         self,
-        device: Union[int, str] = 0,
+        device: int | str = 0,
         width: int = 1280,
         height: int = 720,
         fps: int = 30,
@@ -22,7 +21,7 @@ class WebcamFeed(ImageFeed):
         self._height = height
         self._fps = fps
         self._fourcc = fourcc
-        self._cap: Optional[cv2.VideoCapture] = None
+        self._cap: cv2.VideoCapture | None = None
 
     def open(self) -> None:
         # CAP_V4L2 skips OpenCV's backend guessing, which is flaky in containers.
@@ -51,7 +50,7 @@ class WebcamFeed(ImageFeed):
             self._cap.release()
             self._cap = None
 
-    def read(self) -> Optional[np.ndarray]:
+    def read(self) -> np.ndarray | None:
         if self._cap is None:
             return None
         ok, frame = self._cap.read()

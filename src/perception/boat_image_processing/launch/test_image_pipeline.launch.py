@@ -2,21 +2,21 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 # TO RUN THE NODE SET, USE THIS COMMAND
-# ros2 launch /workspace/src/nodes/boat_perception/boat_perception/launch/test_pipeline.launch.py
+# ros2 launch /workspace/src/perception/boat_image_processing/launch/test_image_pipeline.launch.py
 
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package="boat_perception",
+            package="boat_image_processing",
             executable="image_feed_node",   # must match your setup.py entry_points
             name="image_feed_node",
             parameters=[{"feed_type": "synthetic", "publish_rate_hz": 10.0}],
         ),
         Node(
-            package="boat_perception",
+            package="boat_image_processing",
             executable="image_rectifier_node",
             name="image_rectifier_node",
-            parameters=[{
+            parameters=[{ 
                 "camera_matrix": [500.0, 0.0, 320.0,
                                   0.0, 500.0, 240.0,
                                   0.0, 0.0, 1.0],
@@ -28,13 +28,13 @@ def generate_launch_description():
         ),
         # One viewer for the raw stream, one for the rectified stream
         Node(
-            package="boat_perception",
+            package="boat_image_processing",
             executable="image_viewer_node",
             name="viewer_raw",
             parameters=[{"topic": "camera/image_raw", "mode": "http", "http_port": 8080}],
         ),
         Node(
-            package="boat_perception",
+            package="boat_image_processing",
             executable="image_viewer_node",
             name="viewer_rect",
             parameters=[{"topic": "camera/image_rect", "mode": "http", "http_port": 8081}],

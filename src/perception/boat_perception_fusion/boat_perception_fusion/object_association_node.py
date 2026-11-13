@@ -1,6 +1,6 @@
+import rclpy
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 from rcl_interfaces.msg import FloatingPointRange, IntegerRange, ParameterDescriptor
-import rclpy
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from rclpy.utilities import try_shutdown
@@ -68,7 +68,6 @@ class ObjectAssociation(Node):
         self.publisher = self.create_publisher(
             Detection3DArray, 'objects/detections', 10
         )
-        return
 
     def on_synced(self, det_msg: Detection2DArray, cloud_msg: PointCloud2) -> None:
         """Handle a synced set of detection and point cloud messages."""
@@ -87,7 +86,6 @@ class ObjectAssociation(Node):
     def on_camera_info(self, camera_info: CameraInfo) -> None:
         """Handle updated camera_info."""
         self.camera_info = camera_info
-        return
 
 
 def main(args: list[str] | None = None) -> None:

@@ -1,0 +1,26 @@
+image_width: 640
+image_height: 480
+camera_name: fake_camera
+distortion_model: plumb_bob
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [600.0, 0.0, 320.0,
+         0.0, 600.0, 240.0,
+         0.0, 0.0, 1.0]
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.28, 0.07, 0.001, -0.001, 0.0]   # k1, k2, p1, p2, k3
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.0, 0.0, 0.0,
+         0.0, 1.0, 0.0,
+         0.0, 0.0, 1.0]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [600.0, 0.0, 320.0, 0.0,
+         0.0, 600.0, 240.0, 0.0,
+         0.0, 0.0, 1.0, 0.0]
