@@ -1,4 +1,3 @@
-
 import math  # Provides sine and cosine for converting heading into a quaternion.
 import rclpy  # Provides the ROS 2 Python tools.
 from rclpy.node import Node  # Provides the base class for a ROS 2 node.
@@ -19,6 +18,7 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
         self.detections_callback,  # Calls this method whenever a message arrives.
         10  # Sets the message queue size.
         )
+        self.goal_sent = False
 
     def detections_callback(self, msg): # Defines a function to pull data from topic message
         for buoy in msg.detections:
@@ -30,13 +30,25 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
 
         buoy1 = self.obstacles['buoy_1']
         buoy2 = self.obstacles['buoy_2']
+        buoy3 = self.obstacles['buoy_3']
+        buoy4 = self.obstacles['buoy_4']
 
         x_goal = (buoy1[0] + buoy2[0]) / 2
         y_goal = (buoy1[1] + buoy2[1]) / 2
 
+        # Set goal angle part of pose as angle to next set of buoys, it is really weird how this works
+        # but basically we need to specify
+        x_face = (buoy3[0] + buoy4[0])/2
+        y_face = (buoy3[1] + buoy4[1])/2
+        yaw_goal = math.atan2(y_face - y_goal, x_face - x_goal)
+
         self.get_logger().info(
             f"Calculated waypoint: ({x_goal}, {y_goal})"
         )
+
+        if not self.goal_sent:
+            self.goal_sent = True
+            self.send_goal(x_goal, y_goal, yaw_goal)
     
     def send_goal(self, x, y, yaw):  # Defines a function to send a goal position and heading.
         self.get_logger().info('Waiting for Nav2...')  # Prints a message while waiting for Nav2.
@@ -44,30 +56,11 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
         goal = NavigateToPose.Goal()  # Creates an empty Nav2 goal.
         goal.pose.header.frame_id = 'map'  # Says the goal coordinates are expressed in the map frame.
         goal.pose.header.stamp = self.get_clock().now().to_msg() # getting time?
-        # Get next buoys position
-        buoy1_x = self.obstacles['buoy_1'][0]
-        buoy1_y = self.obstacles['buoy_1'][1]
-        buoy2_x = self.obstacles['buoy_2'][0]
-        buoy2_y = self.obstacles['buoy_2'][1]
-        # Get future buoys position
-        buoy3_x = self.obstacles['buoy_3'][0]
-        buoy3_y = self.obstacles['buoy_3'][1]
-        buoy4_x = self.obstacles['buoy_4'][0]
-        buoy4_y = self.obstacles['buoy_4'][1]
-        # Set goal pose as midoint between buoys
-        
-        x_goal = (buoy1_x + buoy2_x)/2
-        y_goal = (buoy1_y + buoy2_y)/2
-        goal.pose.pose.position.x = x_goal  # Sets the goal's x position in meters.
-        goal.pose.pose.position.y = y_goal  # Sets the goal's y position in meters.
+
+        goal.pose.pose.position.x = x  # Sets the goal's x position in meters.
+        goal.pose.pose.position.y = y  # Sets the goal's y position in meters.
         goal.pose.pose.position.z = 0.0  # Sets the goal's z position to zero for 2D navigation.
         
-
-        # Set goal angle part of pose as angle to next set of buoys, it is really weird how this works
-        # but basically we need to specify
-        x_face = (buoy3_x + buoy4_x)/2
-        y_face = (buoy3_y + buoy4_y)/2
-        yaw = math.atan2(x_face, y_face)
         goal.pose.pose.orientation.x = 0.0
         goal.pose.pose.orientation.y = 0.0 # x and y are always zero because we never tilt around those axes
         goal.pose.pose.orientation.z = math.sin(yaw / 2.0)  # Converts the requested heading into the quaternion's z part.
@@ -99,6 +92,8 @@ class Nav2GoalSender(Node):  # Defines a ROS 2 node that can send a goal to Nav2
 def main(args=None):  # Defines the function that starts and stops this ROS 2 program.
     rclpy.init(args=args)  # Initializes ROS 2 for this program.
     node = Nav2GoalSender()  # Creates this program's ROS 2 node.
+    # to be able to uncomment this line, you need to make sure that the Nav2 /navigate_to_pose
+    # action is running. Run this command in the container: ros2 launch nav2_bringup navigation_launch.py
     # node.send_goal(x=2.0, y=1.0, yaw=0.0)  # Sends an example goal 2 m east, 1 m north, facing along +x.
 
     try:
