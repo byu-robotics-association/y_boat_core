@@ -94,7 +94,7 @@ def TF_to_transform_matrix(tf: TransformStamped) -> FloatArray:
     return transform_matrix
 
 # CONVERSION #5 - Convert ObjectEstimate into Detection3D, and collect it into a Detection3DArray
-def Obj_Estimate_to_Detection3D(estimate: ObjectEstimate) -> Detection3DArray:
+def Obj_Estimate_to_Detection3D(estimate: ObjectEstimate) -> Detection3DArray
     pass
     # This only does one Detection3D object - but we need the whole array?
 
