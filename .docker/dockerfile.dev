@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip3 install --no-cache-dir --break-system-packages \
     --extra-index-url https://download.pytorch.org/whl/cpu \
-    ultralytics "numpy<2"
+    ultralytics "numpy<2" scipy
 
 WORKDIR ${WORKSPACE}
 
