@@ -3,13 +3,14 @@ import numpy as np
 from sensor_msgs.msg import PointCloud2, CameraInfo
 from sensor_msgs_py import point_cloud2
 from vision_msgs.msg import Detection2DArray, Detection3DArray
+from visualization_msgs.msg import MarkerArray, Marker
 from .types import Detection, Box2D, FloatArray, ObjectEstimate
 from tf2_ros import TransformStamped
 from scipy.spatial.transform import Rotation
 
 # CONVERSION #1 - Convert det_msg into a list of detection objects
 
-def det_msg_to_Detection_list(det_msg: Detection2DArray) -> list[Detection]:
+def det_msg_to_detection_list(det_msg: Detection2DArray) -> list[Detection]:
     """
     DESCRIPTION
     Creates a list of Detection (numpy) objects by converting the ROS2 array of detections
@@ -43,7 +44,7 @@ def det_msg_to_Detection_list(det_msg: Detection2DArray) -> list[Detection]:
     return detection_list
 
 # CONVERSION #2 - Convert PointCloud2 to XYZ Float Array
-def pointcloud_to_Float_Array(pointcloud_msg: PointCloud2) -> FloatArray:
+def pointcloud_to_float_array(pointcloud_msg: PointCloud2) -> FloatArray:
     """
     DESCRIPTION
     Creates an (N, 3) matrix of all the coordinates of the point cloud
@@ -61,7 +62,7 @@ def pointcloud_to_Float_Array(pointcloud_msg: PointCloud2) -> FloatArray:
     return pointcloud_data
 
 # CONVERSION #3 - Convert Camera Info into P transformation matrix
-def camera_info_to_P(camera_info: CameraInfo) -> FloatArray:
+def camera_info_to_p(camera_info: CameraInfo) -> FloatArray:
     """
     DESCRIPTION
     Creates a (3, 4) P transform matrix to rectify the camera image
@@ -73,7 +74,7 @@ def camera_info_to_P(camera_info: CameraInfo) -> FloatArray:
     return p
 
 # CONVERSION #4 - Convert TF Transform into 4x4 transform matrix
-def TF_to_transform_matrix(tf: TransformStamped) -> FloatArray:
+def tf_to_transform_matrix(tf: TransformStamped) -> FloatArray:
     """
     DESCRIPTION
     Creates a (4, 4) transform matrix for converting point cloud coordinate space to the camera's
@@ -93,9 +94,16 @@ def TF_to_transform_matrix(tf: TransformStamped) -> FloatArray:
     
     return transform_matrix
 
-# CONVERSION #5 - Convert ObjectEstimate into Detection3D, and collect it into a Detection3DArray
-def Obj_Estimate_to_Detection3D(estimate: ObjectEstimate) -> Detection3DArray
+# CONVERSION #5 - Convert ObjectEstimate list into a Detection3DArray
+def obj_estimate_list_to_detection3Darray(estimate_list: list[ObjectEstimate]) -> Detection3DArray:
     pass
-    # This only does one Detection3D object - but we need the whole array?
+
+# CONVERSION #6 - Convert ObjectEstimate list into MarkerArray
+def obj_estimate_list_to_marker_array(object_list: list[ObjectEstimate]) -> MarkerArray:
+    marker_array = MarkerArray()
+    for object in object_list:
+        pass
+    
+    return marker_array
 
 
