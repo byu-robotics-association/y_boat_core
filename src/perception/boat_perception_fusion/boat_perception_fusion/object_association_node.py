@@ -70,7 +70,7 @@ class ObjectAssociation(Node):
         debug_switch = self.get_parameter('debug_mode').value
         if not isinstance(debug_switch, bool):
             raise TypeError('debug_mode must be a bool')
-        debug_mode = debug_switch
+        self.debug_mode = bool(debug_switch)
 
         self.camera_info = None
 
@@ -124,7 +124,8 @@ class ObjectAssociation(Node):
 
         # get latest transform from cloud to cam
         tf: TransformStamped = self.tf_buffer.lookup_transform(self.camera_info.header.frame_id, cloud_msg.header.frame_id, Time.from_msg(cloud_msg.header.stamp))
-
+        # TO-DO, Learn how to throw an exception if this doesn't work
+        
         # Convert all ROS2 data to numpy data types for processing inside pipeline.py
         detection_list = det_msg_to_detection_list(det_msg)
         pointcloud_data = pointcloud_to_float_array(cloud_msg)
@@ -137,18 +138,15 @@ class ObjectAssociation(Node):
         detection_3d_array = obj_estimate_list_to_detection3Darray(object_array)
         msg = detection_3d_array
         msg.header = Header(
-            stamp=det_msg.header.stamp, frame_id=cloud_msg.header.frame_id
+            stamp=cloud_msg.header.stamp, frame_id=cloud_msg.header.frame_id
         )
         self.publisher.publish(msg)
 
         # Build Marker Array in debug mode
         if (self.debug_mode == True):
             marker_array = MarkerArray()
-            marker_array = obj_estimate_list_to_marker_array(object_array)
+            marker_array = obj_estimate_list_to_marker_array(object_array, cloud_msg.header)
             msg = marker_array
-            msg.header = Header(
-                stamp=det_msg.header.stamp, frame_id=cloud_msg.header.frame_id
-            )
             self.debug_publisher.publish(msg)
         return
 

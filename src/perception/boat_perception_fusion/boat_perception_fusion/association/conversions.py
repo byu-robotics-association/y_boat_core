@@ -6,6 +6,7 @@ from vision_msgs.msg import Detection2DArray, Detection3DArray
 from visualization_msgs.msg import MarkerArray, Marker
 from .types import Detection, Box2D, FloatArray, ObjectEstimate
 from tf2_ros import TransformStamped
+from std_msgs.msg import Header
 from scipy.spatial.transform import Rotation
 
 # CONVERSION #1 - Convert det_msg into a list of detection objects
@@ -99,11 +100,40 @@ def obj_estimate_list_to_detection3Darray(estimate_list: list[ObjectEstimate]) -
     pass
 
 # CONVERSION #6 - Convert ObjectEstimate list into MarkerArray
-def obj_estimate_list_to_marker_array(object_list: list[ObjectEstimate]) -> MarkerArray:
+def obj_estimate_list_to_marker_array(object_list: list[ObjectEstimate], header: Header) -> MarkerArray:
     marker_array = MarkerArray()
-    for object in object_list:
-        pass
-    
+    clear_marker = Marker()
+    clear_marker.action = Marker.DELETEALL
+    marker_array.markers.append(clear_marker)
+
+    for object_id, object in enumerate(object_list):
+        marker = Marker()
+        marker.header = header
+        marker.id = object_id
+        marker.type = Marker.CUBE
+        marker.action = Marker.ADD
+
+        # Center position
+        marker.pose.position.x = float(object.position[0])
+        marker.pose.position.y = float(object.position[1])
+        marker.pose.position.z = float(object.position[2])
+
+        # Identity rotation: axis-aligned cube
+        marker.pose.orientation.w = 1.0
+
+        # Dimensions in meters
+        marker.scale.x = float(object.size[0])
+        marker.scale.y = float(object.size[1])
+        marker.scale.z = float(object.size[2])
+
+        # RGBA color; alpha must be nonzero
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 0.5
+
+        marker_array.markers.append(marker)
+
     return marker_array
 
 
