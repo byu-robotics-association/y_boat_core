@@ -21,6 +21,9 @@ def fuse_lidar_camera_data(
         detection_list: list of Detection objects for each object identified in camera image
         box_precision: A parameter we choose for how much bounding boxes are trimmed before mapping LiDAR points onto it
     """
+    if not 0.0 <= box_precision < 0.5:
+        raise ValueError('box_precision must be in [0.0, 0.5)')
+    
     object_estimate_list = []
 
      # Transforms point cloud into camera coordinate frame
@@ -33,8 +36,6 @@ def fuse_lidar_camera_data(
     for detection in detection_list:
 
         # Trim each Detection bounding box by <box_precision> percent on each side
-        if not 0.0 <= box_precision < 0.5:
-            raise ValueError('box_precision must be in [0.0, 0.5)')
         trimmed_box = detection.box.shrunk(box_precision)
 
         # Determines which converted LiDAR data points are inside a Detection bounding box
