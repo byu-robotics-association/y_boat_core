@@ -125,7 +125,7 @@ class ObjectAssociation(Node):
         # get latest transform from cloud to cam
         tf: TransformStamped = self.tf_buffer.lookup_transform(self.camera_info.header.frame_id, cloud_msg.header.frame_id, Time.from_msg(cloud_msg.header.stamp))
         # TO-DO, Learn how to throw an exception if this doesn't work
-        
+
         # Convert all ROS2 data to numpy data types for processing inside pipeline.py
         detection_list = det_msg_to_detection_list(det_msg)
         pointcloud_data = pointcloud_to_float_array(cloud_msg)
@@ -135,19 +135,17 @@ class ObjectAssociation(Node):
         # Build Detection3DArray, send it
         detection_3d_array = Detection3DArray()
         object_array = fuse_lidar_camera_data(pointcloud_data, tf_transform, camera_pmatrix, detection_list, self.box_precision)
-        detection_3d_array = obj_estimate_list_to_detection3Darray(object_array)
-        msg = detection_3d_array
-        msg.header = Header(
+        detection_3d_array = obj_estimate_list_to_detection3Darray(object_array, cloud_msg.header)
+        detection_3d_array.header = Header(
             stamp=cloud_msg.header.stamp, frame_id=cloud_msg.header.frame_id
         )
-        self.publisher.publish(msg)
+        self.publisher.publish(detection_3d_array)
 
         # Build Marker Array in debug mode
-        if (self.debug_mode == True):
+        if (self.debug_mode):
             marker_array = MarkerArray()
             marker_array = obj_estimate_list_to_marker_array(object_array, cloud_msg.header)
-            msg = marker_array
-            self.debug_publisher.publish(msg)
+            self.debug_publisher.publish(marker_array)
         return
 
     def on_camera_info(self, camera_info: CameraInfo) -> None:

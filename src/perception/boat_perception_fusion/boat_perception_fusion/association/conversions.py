@@ -2,7 +2,7 @@
 import numpy as np
 from sensor_msgs.msg import PointCloud2, CameraInfo
 from sensor_msgs_py import point_cloud2
-from vision_msgs.msg import Detection2DArray, Detection3DArray
+from vision_msgs.msg import Detection2DArray, Detection3DArray, Detection3D, ObjectHypothesisWithPose
 from visualization_msgs.msg import MarkerArray, Marker
 from .types import Detection, Box2D, FloatArray, ObjectEstimate
 from tf2_ros import TransformStamped
@@ -25,10 +25,11 @@ def det_msg_to_detection_list(det_msg: Detection2DArray) -> list[Detection]:
     for detection in det_msg.detections:
 
         newBox2D: Box2D = Box2D(
-            cx=detection.bbox.center.x,
-            cy=detection.bbox.center.y, 
+            cx=detection.bbox.center.position.x,
+            cy=detection.bbox.center.position.y, 
             width=detection.bbox.size_x, 
             height=detection.bbox.size_y
+
         )      
         
         #parse thru the results and id data - choose the highest confidence score and associated ID
@@ -96,11 +97,45 @@ def tf_to_transform_matrix(tf: TransformStamped) -> FloatArray:
     return transform_matrix
 
 # CONVERSION #5 - Convert ObjectEstimate list into a Detection3DArray
-def obj_estimate_list_to_detection3Darray(estimate_list: list[ObjectEstimate]) -> Detection3DArray:
-    pass
+def obj_estimate_list_to_detection3Darray(estimate_list: list[ObjectEstimate], cloud_header: Header) -> Detection3DArray:
+    detection_array = Detection3DArray()
+    detection_array.header = cloud_header
+
+    for estimate in estimate_list:
+        detection3d = Detection3D()
+        
+        # Adding the position and size coordinates
+        detection3d.bbox.size.x = float(estimate.size[0])
+        detection3d.bbox.center.position.x = float(estimate.position[0])
+        detection3d.bbox.size.y = float(estimate.size[1])
+        detection3d.bbox.center.position.y = float(estimate.position[1])
+        detection3d.bbox.size.z = float(estimate.size[2])
+        detection3d.bbox.center.position.z = float(estimate.position[2])
+        
+        # DESIGN DECISION - Leaving the orientation of the bounding box alone for now
+        # AI says its “Use identity orientation for an axis-aligned box.”
+        # Cade Woolf
+        detection3d.bbox.center.orientation.w = 1.0
+
+        # Creating an ObjectHypothesisWithPose object to append to the results list
+        # See documentation to understand this part
+        obj_hypo = ObjectHypothesisWithPose()
+        obj_hypo.hypothesis.class_id = estimate.detection.class_id
+        obj_hypo.hypothesis.score = estimate.detection.confidence
+        obj_hypo.pose.pose = detection3d.bbox.center
+        detection3d.results.append(obj_hypo)
+
+        detection3d.id = estimate.detection.detection_id
+        detection3d.header = cloud_header
+
+        detection_array.detections.append(detection3d)
+
+    return detection_array
 
 # CONVERSION #6 - Convert ObjectEstimate list into MarkerArray
 def obj_estimate_list_to_marker_array(object_list: list[ObjectEstimate], header: Header) -> MarkerArray:
+    # DISCLAIMER - most of this function is AI code. I just wanted to get a working concept.
+    # Cade Woolf
     marker_array = MarkerArray()
     clear_marker = Marker()
     clear_marker.action = Marker.DELETEALL
